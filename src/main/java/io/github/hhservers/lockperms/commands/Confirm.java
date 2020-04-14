@@ -2,7 +2,9 @@ package io.github.hhservers.lockperms.commands;
 
 import com.google.common.reflect.TypeToken;
 import io.github.hhservers.lockperms.LockPerms;
+import io.github.hhservers.lockperms.config.ConfigLoader;
 import io.github.hhservers.lockperms.config.ConfigManager;
+import io.github.hhservers.lockperms.config.MainConfiguration;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -18,40 +20,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Confirm implements CommandExecutor {
+
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-        String pass = ConfigManager.confNode.getNode("Commands", "adminpassword").getString();
+        MainConfiguration conf = LockPerms.getMainConfig();
+        String pass = conf.getCmdList().adminpassword;
         Boolean activeTrue = true;
         Boolean activeFalse = false;
-        List<String> configCmds = null;
-        //LockPerms baseInst = new LockPerms();
-        try {
-            configCmds = ConfigManager.confNode.getNode("Commands", "CommandList").getList(TypeToken.of(String.class));
+        List<String> configCmds = conf.getCmdList().commands;
+
+
         if(args.<String>getOne(Text.of("password")).get().equals(pass)){
             src.sendMessage(Text.of("Password accepted"));
-            ConfigManager.confNode.getNode("Commands", "isActive").setValue(activeFalse);
-            ConfigManager.saveThings();
+            conf.getCmdList().setIsActive(activeFalse);
             for (int i = 0; i < configCmds.size(); i++) {
                 Sponge.getCommandManager().process(Sponge.getServer().getConsole().getCommandSource().get(), configCmds.get(i));
-                src.sendMessage(Text.of("IsActive:"+ConfigManager.confNode.getNode("Commands", "isActive").getBoolean()));
+                //src.sendMessage(Text.of("IsActive:"+ConfigManager.confNode.getNode("Commands", "isActive").getBoolean()));
                 src.sendMessage(Text.of(configCmds.get(i)));
             }
             List<String> blankList = new ArrayList<>();
-            ConfigManager.confNode.getNode("Commands", "CommandList").setValue(blankList);
-            ConfigManager.saveThings();
+            conf.getCmdList().setCommands(blankList);
+            //ConfigManager.confNode.getNode("Commands", "CommandList").setValue(blankList);
+            //ConfigManager.saveThings();
         } else {Text.of("Uh oh. Ur in trouble.");}
-        } catch (ObjectMappingException e) {
-            e.printStackTrace();
-        }
-        ConfigManager.confNode.getNode("Commands", "isActive").setValue(activeTrue);
-        ConfigManager.saveThings();
+
+        conf.getCmdList().setIsActive(activeTrue);
+        LockPerms.getConfigLoader().saveConfig(conf);
         return CommandResult.success();
     }
 
     public static CommandSpec build() throws ObjectMappingException {
         return CommandSpec.builder()
                 .arguments(GenericArguments.string(Text.of("password")))
-                .permission("butils.user")
+                .permission("lockperms.admin")
                 .executor(new Confirm())
                 .build();
     }

@@ -39,10 +39,10 @@ public class LockPerms {
     public static Boolean isActive;
 
     @Getter
-    private MainConfiguration mainConfig;
+    private static MainConfiguration mainConfig;
 
     @Getter
-    private ConfigLoader configLoader;
+    private static ConfigLoader configLoader;
 
     @Inject
     private Logger logger;
@@ -64,7 +64,7 @@ public class LockPerms {
 
     @Listener
     public void onGamePreInit(GamePreInitializationEvent e) {
-        configLoader =new ConfigLoader(this);
+        configLoader=new ConfigLoader(this);
         if (configLoader.loadConfig()) mainConfig = configLoader.getMainConf();
     }
 
@@ -103,11 +103,17 @@ public class LockPerms {
                 String finalCmdString = e.getCommand() + " " + e.getArguments();
                 mainConfig.getCmdList().commands.add(finalCmdString);
                 configLoader.saveConfig(mainConfig);
-                mainConfig= configLoader.getMainConfig();
-                //ManagerConfig.saveConfig();
+                mainConfig=configLoader.getMainConf();
             }
         }
     }
+
+    public void removeLogEntry(Integer index){
+        mainConfig.getCmdList().commands.remove(mainConfig.getCmdList().commands.get(index));
+        configLoader.saveConfig(mainConfig);
+        mainConfig=configLoader.getMainConf();
+    }
+
 
     public static LockPerms getInstance(){
         return instance;
@@ -120,4 +126,6 @@ public class LockPerms {
     public File getConfigDir() {
         return configDir;
     }
+
+
 }

@@ -25,7 +25,7 @@ public class Base implements CommandExecutor {
 
     public static CommandSpec build() throws ObjectMappingException {
         return CommandSpec.builder()
-                .permission("butils.user.base")
+                .permission("lockperms.admin")
                 .executor(new Base())
                 .child(Confirm.build(), "confirm")
                 .child(Log.build(), "log")
