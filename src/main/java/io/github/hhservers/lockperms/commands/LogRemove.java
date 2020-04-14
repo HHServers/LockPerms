@@ -24,13 +24,6 @@ public class LogRemove implements CommandExecutor {
         Integer removeIndex = args.<Integer>getOne(Text.of("index")).get();
             src.sendMessage(Text.of("Command with index "+removeIndex+" removed from list."));
         LockPerms.getInstance().removeLogEntry(removeIndex);
-            /*ConfigLoader loader = LockPerms.getConfigLoader();
-        MainConfiguration conf = LockPerms.getMainConfig();
-            LockPerms.getInstance().getLogger().info(loader.toString()+ conf.toString());
-            conf.getCmdList().commands.remove(removeIndex);
-            LockPerms.getInstance().getLogger().info("After Removal attempt:"+ loader.toString()+ conf.toString());
-            loader.saveConfig(conf);
-            conf =LockPerms.getMainConfig();*/
         return CommandResult.success();
     }
 

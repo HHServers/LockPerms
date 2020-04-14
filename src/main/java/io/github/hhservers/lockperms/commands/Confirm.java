@@ -1,9 +1,6 @@
 package io.github.hhservers.lockperms.commands;
 
-import com.google.common.reflect.TypeToken;
 import io.github.hhservers.lockperms.LockPerms;
-import io.github.hhservers.lockperms.config.ConfigLoader;
-import io.github.hhservers.lockperms.config.ConfigManager;
 import io.github.hhservers.lockperms.config.MainConfiguration;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
@@ -34,14 +31,11 @@ public class Confirm implements CommandExecutor {
             src.sendMessage(Text.of("Password accepted"));
             conf.getCmdList().setIsActive(activeFalse);
             for (int i = 0; i < configCmds.size(); i++) {
-                Sponge.getCommandManager().process(Sponge.getServer().getConsole().getCommandSource().get(), configCmds.get(i));
-                //src.sendMessage(Text.of("IsActive:"+ConfigManager.confNode.getNode("Commands", "isActive").getBoolean()));
+                Sponge.getCommandManager().process(src, configCmds.get(i));
                 src.sendMessage(Text.of(configCmds.get(i)));
             }
             List<String> blankList = new ArrayList<>();
             conf.getCmdList().setCommands(blankList);
-            //ConfigManager.confNode.getNode("Commands", "CommandList").setValue(blankList);
-            //ConfigManager.saveThings();
         } else {Text.of("Uh oh. Ur in trouble.");}
 
         conf.getCmdList().setIsActive(activeTrue);

@@ -19,6 +19,7 @@ import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.io.File;
@@ -78,17 +79,11 @@ public class LockPerms {
     @Listener
     public void onServerStart(GameStartedServerEvent event) {
         instance = this;
-        //managerConfig = new ManagerConfig(loader);
-    }
-
-    @SuppressWarnings("warningToken")
-    public void reload() throws IOException, ObjectMappingException {
-        //mainConfig = ManagerConfig.reloadConfig();
     }
 
     @Listener
     public void onGameReload(GameReloadEvent e) throws IOException, ObjectMappingException {
-        reload();
+
     }
 
     @Listener
@@ -96,7 +91,7 @@ public class LockPerms {
         String cmd = e.getCommand();
         String[] cmdArray = cmd.split(" ");
 
-        if(cmdArray[0].equals("lp") || cmdArray.equals("luckperms:lp")){
+        if(cmdArray[0].equals("lp") || cmdArray[0].equals("luckperms:lp") || cmdArray[0].equals("luckperms:luckperms") || cmdArray[0].equals("luckperms")){
             if(mainConfig.getCmdList().isActive) {
                 e.setCancelled(true);
                 src.sendMessage(TextSerializers.FORMATTING_CODE.deserialize("&l&8[&bLogged LP command for confirmation by admin.&r&l&8]"));

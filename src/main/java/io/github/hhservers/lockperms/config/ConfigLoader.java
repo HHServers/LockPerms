@@ -3,16 +3,15 @@ package io.github.hhservers.lockperms.config;
 import com.google.common.reflect.TypeToken;
 import io.github.hhservers.lockperms.LockPerms;
 import lombok.Data;
-import lombok.Getter;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+
 
 
 import java.io.File;
-import java.io.IOException;
+
 
 
 @Data
