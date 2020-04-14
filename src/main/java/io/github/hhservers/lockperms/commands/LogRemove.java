@@ -1,10 +1,8 @@
 package io.github.hhservers.lockperms.commands;
 
-import com.google.common.reflect.TypeToken;
 import io.github.hhservers.lockperms.LockPerms;
-import io.github.hhservers.lockperms.config.ConfigManager;
 import io.github.hhservers.lockperms.config.MainConfiguration;
-import io.github.hhservers.lockperms.config.ManagerConfig;
+import io.github.hhservers.lockperms.config.ConfigLoader;
 import lombok.SneakyThrows;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.command.CommandException;
@@ -18,18 +16,22 @@ import org.spongepowered.api.text.Text;
 
 
 public class LogRemove implements CommandExecutor {
-    private LockPerms lockPerms = LockPerms.getInstance();
-    private MainConfiguration mainConfig;
+    private MainConfiguration conf;
+    private ConfigLoader loader;
+
     @SneakyThrows
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
         Integer removeIndex = args.<Integer>getOne(Text.of("index")).get();
             src.sendMessage(Text.of("Command with index "+removeIndex+" removed from list."));
-            mainConfig.getCmdList().commands.remove(removeIndex);
-            ManagerConfig.saveConfig();
-            //ManagerConfig.reloadConfig();
-            //mainConfiguration.getCmdList().commands.remove(removeIndex);
-            //managerConfig.update();
+            conf=LockPerms.getInstance().getMainConfig();
+            loader=LockPerms.getInstance().getConfigLoader();
+            conf.getCmdList().commands.remove(removeIndex);
+            loader.saveConfig(conf);
+            conf = loader.getMainConfig();
+
+
+            //mainConfig.getCmdList().commands.remove(removeIndex);
         return CommandResult.success();
     }
 

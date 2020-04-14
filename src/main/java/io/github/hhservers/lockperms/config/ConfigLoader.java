@@ -3,23 +3,84 @@ package io.github.hhservers.lockperms.config;
 import com.google.common.reflect.TypeToken;
 import io.github.hhservers.lockperms.LockPerms;
 import lombok.Data;
-import lombok.Getter;
-import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.gson.GsonConfigurationLoader;
+import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
+import java.io.File;
+
 
 @Data
-public class ManagerConfig {
+public class ConfigLoader {
 
+  private static final LockPerms instance = LockPerms.getInstance();
+  private final LockPerms plugin;
+
+  private MainConfiguration mainConf;
+  private ConfigurationLoader<CommentedConfigurationNode> configLoad;
+
+    public ConfigLoader(LockPerms pl) {
+        this.plugin = pl;
+        if (!plugin.getConfigDir().exists()) {
+            plugin.getConfigDir().mkdirs();
+        }
+    }
+
+    public boolean loadConfig() {
+        try {
+            File file = new File(plugin.getConfigDir(), "LockPerms.conf");
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            configLoad = HoconConfigurationLoader.builder().setFile(file).build();
+            CommentedConfigurationNode config = configLoad.load(ConfigurationOptions.defaults().setObjectMapperFactory(plugin.getFactory()).setShouldCopyDefaults(true));
+            mainConf = config.getValue(TypeToken.of(MainConfiguration.class), new MainConfiguration());
+            configLoad.save(config);
+            return true;
+        } catch (Exception e) {
+            plugin.getLogger().error("Could not load config.", e);
+            return false;
+        }
+    }
+
+    public void saveConfig(MainConfiguration newConfig) {
+        try {
+            File file = new File(plugin.getConfigDir(), "LockPerms.conf");
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            CommentedConfigurationNode config = configLoad.load(ConfigurationOptions.defaults().setObjectMapperFactory(plugin.getFactory()).setShouldCopyDefaults(true));
+            config.setValue(TypeToken.of(MainConfiguration.class), newConfig);
+            configLoad.save(config);
+        } catch (Exception e) {
+        }
+    }
+
+    public MainConfiguration getMainConfig(){
+        return mainConf;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /*
+    //a mess a huge big MESS/////////////////////////
     //private ConfigurationLoader<CommentedConfigurationNode> configurationLoader;
     private ConfigurationOptions options;
     private MainConfiguration mainConfiguration;
@@ -54,7 +115,7 @@ public class ManagerConfig {
         configLoader.save(configLoader.createEmptyNode().setValue(TypeToken.of(MainConfiguration.class), config));
     }
 
-
+*/
 
 
 

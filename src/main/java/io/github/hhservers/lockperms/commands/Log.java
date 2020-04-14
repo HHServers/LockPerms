@@ -1,10 +1,7 @@
 package io.github.hhservers.lockperms.commands;
 
-import com.google.common.reflect.TypeToken;
 import io.github.hhservers.lockperms.LockPerms;
-import io.github.hhservers.lockperms.config.ConfigManager;
 import io.github.hhservers.lockperms.config.MainConfiguration;
-import io.github.hhservers.lockperms.config.ManagerConfig;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -23,8 +20,8 @@ public class Log implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
         src.sendMessage(Text.of(TextColors.GREEN, "LOG:"));
-            MainConfiguration config = new MainConfiguration();
-            List<String> cmdList = config.getCmdList().commands;
+            mainConfig=lockperms.getMainConfig();
+            List<String> cmdList = mainConfig.getCmdList().commands;
             for (int i = 0; i < cmdList.size() ; i++) {
                 src.sendMessage(Text.of("Index:"+i+" ~~ "+cmdList.get(i)));
             }

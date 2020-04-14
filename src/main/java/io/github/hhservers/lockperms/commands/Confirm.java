@@ -24,7 +24,7 @@ public class Confirm implements CommandExecutor {
         Boolean activeTrue = true;
         Boolean activeFalse = false;
         List<String> configCmds = null;
-        LockPerms baseInst = new LockPerms();
+        //LockPerms baseInst = new LockPerms();
         try {
             configCmds = ConfigManager.confNode.getNode("Commands", "CommandList").getList(TypeToken.of(String.class));
         if(args.<String>getOne(Text.of("password")).get().equals(pass)){

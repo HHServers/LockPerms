@@ -14,7 +14,7 @@ public class MainConfiguration {
     private MainConfiguration.CmdList cmdList = new CmdList();
 
     @ConfigSerializable @Data
-    public static class CmdList {
+    public class CmdList {
         @Setting(value="adminpassword")
         public String adminpassword = "defaultpass";
         @Setting(value="isActive")
