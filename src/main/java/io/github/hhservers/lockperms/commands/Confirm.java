@@ -12,6 +12,7 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class Confirm implements CommandExecutor {
             }
             List<String> blankList = new ArrayList<>();
             conf.getCmdList().setCommands(blankList);
-        } else {Text.of("Uh oh. Ur in trouble.");}
+        } else {src.sendMessage(TextSerializers.FORMATTING_CODE.deserialize("&l&8[&r&cLock&aPerms&r&l&8] [&r&cIncorrect Password&r&l&8]&r"));}
 
         conf.getCmdList().setIsActive(activeTrue);
         LockPerms.getConfigLoader().saveConfig(conf);

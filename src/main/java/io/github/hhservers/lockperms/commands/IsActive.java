@@ -24,6 +24,7 @@ public class IsActive implements CommandExecutor {
             mainConf.getCmdList().setIsActive(playerChoice);
             LockPerms.getConfigLoader().saveConfig(mainConf);
             mainConf = LockPerms.getConfigLoader().getMainConf();
+            src.sendMessage(Text.of("Set LockPerms to: " + playerChoice));
         } else {src.sendMessage(TextSerializers.FORMATTING_CODE.deserialize("&l&8[&r&cLock&aPerms&r&l&8] [&r&cIncorrect Password&r&l&8]&r"));}
 
         return CommandResult.success();
