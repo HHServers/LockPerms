@@ -1,11 +1,7 @@
-package io.github.hhservers.lockperms.commands;
+package io.github.hhservers.lockperms.command.base;
 
 import io.github.hhservers.lockperms.LockPerms;
-import io.github.hhservers.lockperms.config.MainConfiguration;
-import io.github.hhservers.lockperms.config.ConfigLoader;
 import lombok.SneakyThrows;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;

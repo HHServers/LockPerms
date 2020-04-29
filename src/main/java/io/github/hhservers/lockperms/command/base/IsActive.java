@@ -1,4 +1,4 @@
-package io.github.hhservers.lockperms.commands;
+package io.github.hhservers.lockperms.command.base;
 
 import io.github.hhservers.lockperms.LockPerms;
 import io.github.hhservers.lockperms.config.MainConfiguration;
@@ -10,22 +10,29 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
 
 public class IsActive implements CommandExecutor {
+    
+    private final LockPerms lockPerms = LockPerms.getInstance();
+    
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-        LockPerms lockPerms = LockPerms.getInstance();
-        MainConfiguration mainConf = LockPerms.getMainConfig();
-        Boolean playerChoice = args.<Boolean>getOne(Text.of("active")).get();
+        MainConfiguration mainConf = lockPerms.getMainConfig();
+        boolean active = args.<Boolean>getOne(Text.of("active")).get();
         String password = args.<String>getOne(Text.of("password")).get();
-        String confPassword = LockPerms.getMainConfig().getCmdList().adminpassword;
+        String confPassword = lockPerms.getMainConfig().getGeneral().adminPassword;
         if(password.equals(confPassword)) {
-            mainConf.getCmdList().setIsActive(playerChoice);
-            LockPerms.getConfigLoader().saveConfig(mainConf);
-            mainConf = LockPerms.getConfigLoader().getMainConf();
-            src.sendMessage(Text.of("Set LockPerms to: " + playerChoice));
-        } else {src.sendMessage(TextSerializers.FORMATTING_CODE.deserialize("&l&8[&r&cLock&aPerms&r&l&8] [&r&cIncorrect Password&r&l&8]&r"));}
+            mainConf.getGeneral().setActive(active);
+            lockPerms.getConfigurationManager().saveConfig(mainConf);
+            if(active){
+                lockPerms.sendSuccessMessage(src, "You have enabled LockPerms!");
+            } else {
+                lockPerms.sendErrorMessage(src, "You have disabled LockPerms!");
+            }
+            lockPerms.getLogger().debug("Updated the status of LockPerms");
+        } else {
+            lockPerms.sendErrorMessage(src, "The password specified is incorrect!");
+        }
 
         return CommandResult.success();
     }
