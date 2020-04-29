@@ -35,8 +35,10 @@ import java.util.List;
         name = "LockPerms",
         description = "blvxr",
         authors = {
-                "blvxr"
+                "blvxr",
+                "TheFlash787"
         }
+
 )
 public class LockPerms {
 
