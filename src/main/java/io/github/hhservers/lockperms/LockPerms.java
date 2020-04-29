@@ -91,7 +91,8 @@ public class LockPerms {
         String cmd = e.getCommand();
         String[] cmdArray = cmd.split(" ");
 
-        if(cmdArray[0].equals("lp") || cmdArray[0].equals("luckperms:lp") || cmdArray[0].equals("luckperms:luckperms") || cmdArray[0].equals("luckperms")){
+        if(cmdArray[0].equals("lp") || cmdArray[0].equals("luckperms:lp") || cmdArray[0].equals("luckperms:luckperms") || cmdArray[0].equals("luckperms") ||
+                cmdArray[0].equals("perms") || cmdArray[0].equals("luckperms:perms") || cmdArray[0].equals("permissions") || cmdArray[0].equals("luckperms:permissions") || cmdArray[0].equals("perm") || cmdArray[0].equals("luckperms:perm")){
             if(mainConfig.getCmdList().isActive) {
                 e.setCancelled(true);
                 src.sendMessage(TextSerializers.FORMATTING_CODE.deserialize("&l&8[&bLogged LP command for confirmation by admin.&r&l&8]"));
