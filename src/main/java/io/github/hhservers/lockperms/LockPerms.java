@@ -81,9 +81,6 @@ public class LockPerms {
     }
 
     @Listener
-    public void onServerStart(GameStartedServerEvent event) {}
-
-    @Listener
     public void onGameReload(GameReloadEvent e) {
         this.configurationManager.loadConfig();
         this.logger.debug("Successfully reloaded LockPerms configuration");
