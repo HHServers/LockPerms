@@ -98,13 +98,14 @@ public class LockPerms {
                 if(cmd.contains("--password")){
                     int param = cmdSegments.indexOf("--password");
                     String password = cmdSegments.get(param + 1);
-                    String newCommand = cmd.replace(" --password", "").replace(" " + password, "");
+                    String newArguments = e.getArguments().replace(" --password", "").replace(" " + password, "");
+                    String newCommand = e.getCommand() + " " + newArguments;
                     if(password.equals(mainConfig.getGeneral().adminPassword)){
-                        e.setCommand(newCommand);
+                        e.setArguments(newArguments);
                         return;
                     } else {
                         cmd = newCommand;
-                        src.sendMessage(Text.of(TextColors.RED, "The password specified is incorrect!"));
+                        this.sendErrorMessage(src, "The password specified is incorrect!");
                     }
                 }
                 e.setCancelled(true);
