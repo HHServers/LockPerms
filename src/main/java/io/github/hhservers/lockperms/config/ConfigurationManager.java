@@ -13,83 +13,50 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import java.io.File;
 
 
-
 @Data
-public class ConfigLoader {
-
-  private static final LockPerms instance = LockPerms.getInstance();
-  private final LockPerms plugin;
+public class ConfigurationManager {
 
   private MainConfiguration mainConf;
-  private ConfigurationLoader<CommentedConfigurationNode> configLoad;
 
-    public ConfigLoader(LockPerms pl) {
-        this.plugin = pl;
-        if (!plugin.getConfigDir().exists()) {
-            plugin.getConfigDir().mkdirs();
+    public ConfigurationManager() {
+        if (!LockPerms.getInstance().getConfigDir().exists()) {
+            LockPerms.getInstance().getConfigDir().mkdirs();
         }
     }
 
     public boolean loadConfig() {
         try {
-            File file = new File(plugin.getConfigDir(), "LockPerms.conf");
+            File file = new File(LockPerms.getInstance().getConfigDir(), "LockPerms.conf");
             if (!file.exists()) {
                 file.createNewFile();
             }
-            configLoad = HoconConfigurationLoader.builder().setFile(file).build();
-            CommentedConfigurationNode config = configLoad.load(ConfigurationOptions.defaults().setObjectMapperFactory(plugin.getFactory()).setShouldCopyDefaults(true));
-            mainConf = config.getValue(TypeToken.of(MainConfiguration.class), new MainConfiguration());
-            configLoad.save(config);
+            ConfigurationOptions options = ConfigurationOptions.defaults().setShouldCopyDefaults(true);
+            CommentedConfigurationNode config = LockPerms.getInstance().getConfigurationLoader().load(options);
+
+            /* Store the configuration, or grab a new one and save it */
+            this.mainConf = config.getValue(TypeToken.of(MainConfiguration.class), new MainConfiguration());
+            LockPerms.getInstance().getConfigurationLoader().save(config);
             return true;
         } catch (Exception e) {
-            plugin.getLogger().error("Could not load config.", e);
+            LockPerms.getInstance().getLogger().error("Could not load config.", e);
             return false;
         }
     }
 
     public void saveConfig(MainConfiguration newConfig) {
         try {
-            File file = new File(plugin.getConfigDir(), "LockPerms.conf");
+            File file = new File(LockPerms.getInstance().getConfigDir(), "LockPerms.conf");
             if (!file.exists()) {
                 file.createNewFile();
             }
-            CommentedConfigurationNode config = configLoad.load(ConfigurationOptions.defaults().setObjectMapperFactory(plugin.getFactory()).setShouldCopyDefaults(true));
+            ConfigurationOptions options = ConfigurationOptions.defaults().setShouldCopyDefaults(true);
+            CommentedConfigurationNode config = LockPerms.getInstance().getConfigurationLoader().load(options);
             config.setValue(TypeToken.of(MainConfiguration.class), newConfig);
-            configLoad.save(config);
+            LockPerms.getInstance().getConfigurationLoader().save(config);
         } catch (Exception e) {
             LockPerms.getInstance().getLogger().info("Error"+e);
         }
     }
-
-    public ConfigurationLoader<CommentedConfigurationNode> getLoader(){
-        try {
-            File file = new File(plugin.getConfigDir(), "LockPerms.conf");
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-        configLoad = HoconConfigurationLoader.builder().setFile(file).build();
-        } catch (Exception e) {
-            LockPerms.getInstance().getLogger().info("Error"+e);
-        }
-        return configLoad;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     /*
     //a mess a huge big MESS/////////////////////////

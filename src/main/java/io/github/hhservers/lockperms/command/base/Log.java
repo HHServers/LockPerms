@@ -1,4 +1,4 @@
-package io.github.hhservers.lockperms.commands;
+package io.github.hhservers.lockperms.command.base;
 
 import io.github.hhservers.lockperms.LockPerms;
 import io.github.hhservers.lockperms.config.MainConfiguration;
@@ -11,7 +11,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.ArrayList;
@@ -23,7 +22,7 @@ public class Log implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
             mainConfig=lockperms.getMainConfig();
-            List<String> cmdList = mainConfig.getCmdList().commands;
+            List<String> cmdList = mainConfig.getGeneral().pendingCommands;
             List<Text> pageList = new ArrayList<>();
             pageList.add(TextSerializers.FORMATTING_CODE.deserialize("&l&8[&r&aINDEX &b~~ &dENTRY&l&8]&r"));
             for (int i = 0; i < cmdList.size() ; i++) {

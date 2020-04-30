@@ -4,8 +4,7 @@ perm node: ``lockperms.admin``
 -/lockperms log - displays log of LP commands  
 -/lockperms log remove <index> - remove an unwanted command from log  
 -/lockperms confirm [password] - confirm commands for execution  
--/lockperms active [true/false] [password]  
--/lockperms permset "lp user USER permission set PERMISSION" [password]  
+-/lockperms active [true/false] [password]
 
 and of course if you would like to use/tweak it for yourself here is the source - although do let me know any cool features you add so i can try them too :D!
 

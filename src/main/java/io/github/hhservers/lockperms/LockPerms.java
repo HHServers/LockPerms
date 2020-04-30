@@ -1,16 +1,18 @@
 package io.github.hhservers.lockperms;
 
 import com.google.inject.Inject;
-import io.github.hhservers.lockperms.commands.Base;
+import io.github.hhservers.lockperms.command.BaseCommand;
 import io.github.hhservers.lockperms.config.MainConfiguration;
-import io.github.hhservers.lockperms.config.ConfigLoader;
+import io.github.hhservers.lockperms.config.ConfigurationManager;
 import lombok.Getter;
-import ninja.leaping.configurate.objectmapping.GuiceObjectMapperFactory;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.command.SendCommandEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.GameReloadEvent;
@@ -20,108 +22,133 @@ import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Plugin(
         id = "lockperms",
         name = "LockPerms",
         description = "blvxr",
         authors = {
-                "blvxr"
+                "blvxr",
+                "TheFlash787"
         }
+
 )
 public class LockPerms {
 
     private static LockPerms instance;
 
-    public static Boolean isActive;
+    @Getter
+    private MainConfiguration mainConfig;
 
     @Getter
-    private static MainConfiguration mainConfig;
+    private ConfigurationManager configurationManager;
 
-    @Getter
-    private static ConfigLoader configLoader;
-
-    @Inject
+    @Inject @Getter
     private Logger logger;
 
-    public Logger getLogger(){
-        return logger;
-    }
-
-    private final GuiceObjectMapperFactory factory;
-    private final File configDir;
+    @Inject
+    @Getter
+    @ConfigDir(sharedRoot = false)
+    private File configDir;
 
     @Inject
-    public LockPerms(GuiceObjectMapperFactory factory, @ConfigDir(sharedRoot = false) File configDir) {
-        this.factory=factory;
-        this.configDir=configDir;
-        instance=this;
-    }
-
+    @Getter
+    @DefaultConfig(sharedRoot = false)
+    private ConfigurationLoader<CommentedConfigurationNode> configurationLoader;
 
     @Listener
     public void onGamePreInit(GamePreInitializationEvent e) {
-        configLoader=new ConfigLoader(this);
-        if (configLoader.loadConfig()) mainConfig = configLoader.getMainConf();
+        instance = this;
+        configurationManager = new ConfigurationManager();
+
+        /* Load the configuration */
+        if(configurationManager.loadConfig()){
+            this.mainConfig = configurationManager.getMainConf();
+            this.logger.debug("Successfully loaded the configuration");
+        } else {
+            this.logger.error("There was an issue while loading the configuration!");
+        }
     }
 
     @Listener
     public void onGameInit(GameInitializationEvent e) throws ObjectMappingException {
-        instance = this;
-        Sponge.getCommandManager().register(instance, Base.build(), "lockperms", "lockp");
-        isActive=true;
+        Sponge.getCommandManager().register(instance, BaseCommand.build(), "lockperms", "lockp");
     }
 
     @Listener
-    public void onServerStart(GameStartedServerEvent event) {
-        instance = this;
+    public void onGameReload(GameReloadEvent e) {
+        this.configurationManager.loadConfig();
+        this.logger.debug("Successfully reloaded LockPerms configuration");
     }
 
     @Listener
-    public void onGameReload(GameReloadEvent e) throws IOException, ObjectMappingException {
+    public void onCommandSendEvent(SendCommandEvent e, @First CommandSource src) {
+        String cmd = e.getCommand() + " " + e.getArguments();
+        List<String> cmdSegments = new ArrayList<>(Arrays.asList(cmd.split(" ")));
 
-    }
-
-    @Listener
-    public void commandSentEvent(SendCommandEvent e, @First CommandSource src) throws ObjectMappingException, IOException {
-        String cmd = e.getCommand();
-        String[] cmdArray = cmd.split(" ");
-
-        if(cmdArray[0].equals("lp") || cmdArray[0].equals("luckperms:lp") || cmdArray[0].equals("luckperms:luckperms") || cmdArray[0].equals("luckperms") ||
-                cmdArray[0].equals("perms") || cmdArray[0].equals("luckperms:perms") || cmdArray[0].equals("permissions") || cmdArray[0].equals("luckperms:permissions") || cmdArray[0].equals("perm") || cmdArray[0].equals("luckperms:perm")){
-            if(mainConfig.getCmdList().isActive) {
+        if(cmd.startsWith("luckperms") || cmd.startsWith("lp") || cmd.startsWith("perm")){
+            if(mainConfig.getGeneral().active){
+                if(cmd.contains("--password")){
+                    int param = cmdSegments.indexOf("--password");
+                    String password = cmdSegments.get(param + 1);
+                    String newArguments = e.getArguments().replace(" --password", "").replace(" " + password, "");
+                    String newCommand = e.getCommand() + " " + newArguments;
+                    if(password.equals(mainConfig.getGeneral().adminPassword)){
+                        e.setArguments(newArguments);
+                        return;
+                    } else {
+                        cmd = newCommand;
+                        this.sendErrorMessage(src, "The password specified is incorrect!");
+                    }
+                }
                 e.setCancelled(true);
-                src.sendMessage(TextSerializers.FORMATTING_CODE.deserialize("&l&8[&bLogged LP command for confirmation by admin.&r&l&8]"));
-                String finalCmdString = e.getCommand() + " " + e.getArguments();
-                mainConfig.getCmdList().commands.add(finalCmdString);
-                configLoader.saveConfig(mainConfig);
-                mainConfig=configLoader.getMainConf();
+                this.sendInfoMessage(src, "Logged LP command for confirmation by admin");
+                mainConfig.getGeneral().pendingCommands.add(cmd);
+                this.configurationManager.saveConfig(mainConfig);
+                this.mainConfig = configurationManager.getMainConf();
+
             }
         }
     }
 
     public void removeLogEntry(Integer index){
-        mainConfig.getCmdList().commands.remove(mainConfig.getCmdList().commands.get(index));
-        configLoader.saveConfig(mainConfig);
-        mainConfig=configLoader.getMainConf();
+        mainConfig.getGeneral().pendingCommands.remove(mainConfig.getGeneral().pendingCommands.get(index));
+        configurationManager.saveConfig(mainConfig);
+        mainConfig = configurationManager.getMainConf();
     }
-
 
     public static LockPerms getInstance(){
         return instance;
     }
 
-    public GuiceObjectMapperFactory getFactory() {
-        return factory;
+    public void sendInfoMessage(CommandSource source, String message){
+        source.sendMessage(Text.builder()
+                .append(Text.of(TextColors.DARK_GRAY, TextStyles.BOLD, "["))
+                .append(Text.of(TextStyles.RESET, TextColors.AQUA, message))
+                .append(Text.of(TextColors.DARK_GRAY, TextStyles.BOLD, "]"))
+                .build());
     }
 
-    public File getConfigDir() {
-        return configDir;
+    public void sendErrorMessage(CommandSource source, String message){
+        source.sendMessage(Text.builder()
+                .append(Text.of(TextColors.DARK_GRAY, TextStyles.BOLD, "["))
+                .append(Text.of(TextStyles.RESET, TextColors.RED, message))
+                .append(Text.of(TextColors.DARK_GRAY, TextStyles.BOLD, "]"))
+                .build());
     }
 
-
+    public void sendSuccessMessage(CommandSource source, String message){
+        source.sendMessage(Text.builder()
+                .append(Text.of(TextColors.DARK_GRAY, TextStyles.BOLD, "["))
+                .append(Text.of(TextStyles.RESET, TextColors.GREEN, message))
+                .append(Text.of(TextColors.DARK_GRAY, TextStyles.BOLD, "]"))
+                .build());
+    }
 }

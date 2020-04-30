@@ -1,4 +1,4 @@
-package io.github.hhservers.lockperms.commands;
+package io.github.hhservers.lockperms.command.base;
 
 import io.github.hhservers.lockperms.LockPerms;
 import io.github.hhservers.lockperms.config.MainConfiguration;
@@ -12,7 +12,6 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,30 +20,26 @@ public class Confirm implements CommandExecutor {
 
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-        MainConfiguration conf = LockPerms.getMainConfig();
-        String pass = conf.getCmdList().adminpassword;
-        Boolean activeTrue = true;
-        Boolean activeFalse = false;
-        List<String> configCmds = conf.getCmdList().commands;
-
+        MainConfiguration conf = LockPerms.getInstance().getMainConfig();
+        String pass = conf.getGeneral().adminPassword;
+        List<String> configCmds = conf.getGeneral().pendingCommands;
 
         if(args.<String>getOne(Text.of("password")).get().equals(pass)){
-            src.sendMessage(Text.of("Password accepted"));
-            conf.getCmdList().setIsActive(activeFalse);
-            for (int i = 0; i < configCmds.size(); i++) {
-                Sponge.getCommandManager().process(src, configCmds.get(i));
-                src.sendMessage(Text.of(configCmds.get(i)));
+            LockPerms.getInstance().sendSuccessMessage(src, "Password Accepted! Your pending commands will now run.");
+            conf.getGeneral().setActive(false);
+            for(String command : configCmds){
+                Sponge.getCommandManager().process(src, command.replace("/", ""));
             }
-            List<String> blankList = new ArrayList<>();
-            conf.getCmdList().setCommands(blankList);
-        } else {src.sendMessage(TextSerializers.FORMATTING_CODE.deserialize("&l&8[&r&cLock&aPerms&r&l&8] [&r&cIncorrect Password&r&l&8]&r"));}
-
-        conf.getCmdList().setIsActive(activeTrue);
-        LockPerms.getConfigLoader().saveConfig(conf);
+            conf.getGeneral().setActive(true);
+            conf.getGeneral().setPendingCommands(new ArrayList<>());
+            LockPerms.getInstance().getConfigurationManager().saveConfig(conf);
+        } else {
+            LockPerms.getInstance().sendErrorMessage(src, "The password specified is incorrect!");
+        }
         return CommandResult.success();
     }
 
-    public static CommandSpec build() throws ObjectMappingException {
+    public static CommandSpec build() {
         return CommandSpec.builder()
                 .arguments(GenericArguments.string(Text.of("password")))
                 .permission("lockperms.admin")
